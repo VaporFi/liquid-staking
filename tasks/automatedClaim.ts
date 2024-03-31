@@ -5,15 +5,15 @@ import type { DepositEvent } from '../typechain-types/src/facets/DepositFacet'
 import Bottleneck from 'bottleneck'
 import * as path from 'path'
 
-const BLOCK_RANGE = 500
+const BLOCK_RANGE = 1000
 
 const FROM_BLOCK: { [key: string]: number } = {
   fuji: 23009545,
-  avalanche: 0, // TODO: Update this once we have a mainnet deployment
+  avalanche: 32271032,
 }
 
 const limiter = new Bottleneck({
-  minTime: 10, // ~30 requests per second
+  minTime: 20, // ~30 requests per second
   maxConcurrent: 1,
 })
 
@@ -134,62 +134,138 @@ task('automated-claim:all', 'Claim all rewards for a season')
         seasonId: seasonToClaim,
       })
 
-      try {
-        // Slice the array into chunks of 100
-        const chunkedDepositors = chunk(depositors, 100)
-
-        // Claim for each chunk
-        for (const chunk of chunkedDepositors) {
-          const validatedWallets = await Promise.all(
-            chunk.map(async (wallet: string) => {
-              const userData = await DiamondManagerFacet.getUserDataForSeason(
-                wallet,
-                seasonToClaim
-              )
-              await new Promise((resolve) => setTimeout(resolve, 100))
-              if (
-                userData.depositPoints > 0 &&
-                !userData.hasWithdrawnOrRestaked
-              ) {
-                return wallet
-              }
-
-              console.log(`Skipping ${wallet} because they have no deposits`)
-              return
-            })
-          )
-          console.log(`Claiming for ${validatedWallets.length} depositors`)
-          const filteredWallets = validatedWallets.filter(
-            (item) => item !== undefined
-          )
-
-          if (filteredWallets.length === 0) {
-            console.log('No wallets to claim for, skipping...')
-            continue
-          }
-
-          if (!dryRun) {
-            const tx = await ClaimFacet.automatedClaimBatch(
-              seasonToClaim,
-              filteredWallets,
-              {
-                gasLimit: 13_000_000,
-              }
-            )
-            await tx.wait(5)
-            console.log(`https://snowtrace.io/tx/${tx.hash}`)
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-          } else {
-            console.log('Dry run, skipping claim')
-          }
-          console.log(`✅ Claimed for ${chunk.length} depositors`)
+      // Wrap the call to getUserDataForSeason in a rate-limited function
+      const getUserDataForSeasonLimited = limiter.wrap(
+        async (wallet: string, seasonToClaim: string) => {
+          return DiamondManagerFacet.getUserDataForSeason(wallet, seasonToClaim)
         }
+      )
 
-        DiamondManagerFacet.setSeasonClaimed()
-      } catch (error) {
-        console.error('❌ AutomatedClaim failed:', error)
-        throw error
+      // Use this limited function in your map
+      const validatedWallets = await Promise.all(
+        depositors.map(async (wallet: string) => {
+          try {
+            const userData = await getUserDataForSeasonLimited(
+              wallet,
+              seasonToClaim
+            )
+            console.log(
+              '🚀 ~ depositors.map ~ userData:',
+              wallet,
+              userData.depositAmount.toString(),
+              userData.depositPoints.toString(),
+              userData.hasWithdrawnOrRestaked.toString()
+            )
+            if (
+              userData.depositPoints > BigInt(0) &&
+              !userData.hasWithdrawnOrRestaked
+            ) {
+              return wallet
+            }
+            console.log(
+              `Skipping ${wallet} because they have no deposits`,
+              userData.depositPoints > 0,
+              userData.hasWithdrawnOrRestaked
+            )
+            return
+          } catch (error) {
+            console.error('❌ getUserDataForSeason failed for', wallet, error)
+            throw error
+          }
+        })
+      )
+
+      const filteredWallets = validatedWallets.filter(Boolean)
+
+      if (dryRun) {
+        console.log('Dry run, skipping claim')
+        console.log(
+          `Would have claimed for ${filteredWallets.length} depositors`
+        )
+        return
       }
+
+      const chunkedDepositors = chunk(filteredWallets, 100)
+
+      for (const chunk of chunkedDepositors) {
+        const tx = await ClaimFacet.automatedClaimBatch(seasonToClaim, chunk, {
+          gasLimit: 13_000_000,
+        })
+        await tx.wait(5)
+        console.log(`✅ Claimed for ${chunk.length} depositors`)
+        console.log(`https://snowtrace.io/tx/${tx.hash}`)
+      }
+
+      DiamondManagerFacet.setSeasonClaimed()
+
+      // try {
+      //   // Slice the array into chunks of 100
+      //   const chunkedDepositors = chunk(depositors, 100)
+
+      //   // Claim for each chunk
+      //   for (const chunk of chunkedDepositors) {
+      //     const validatedWallets = await Promise.all(
+      //       chunk.map(async (wallet: string) => {
+      //         try {
+      //           const userData = await DiamondManagerFacet.getUserDataForSeason(
+      //             wallet,
+      //             seasonToClaim
+      //           )
+      //           if (
+      //             userData.depositPoints > 0 &&
+      //             !userData.hasWithdrawnOrRestaked
+      //           ) {
+      //             return wallet
+      //           }
+
+      //           console.log(
+      //             `Skipping ${wallet} because they have no deposits`,
+      //             userData.depositPoints > 0,
+      //             userData.hasWithdrawnOrRestaked
+      //           )
+      //           return
+      //         } catch (error) {
+      //           console.error(
+      //             '❌ getUserDataForSeason failed for',
+      //             wallet,
+      //             error
+      //           )
+      //           throw error
+      //         }
+      //       })
+      //     )
+      //     console.log(`Claiming for ${validatedWallets.length} depositors`)
+      //     const filteredWallets = validatedWallets.filter(
+      //       (item) => item !== undefined
+      //     )
+
+      //     if (filteredWallets.length === 0) {
+      //       console.log('No wallets to claim for, skipping...')
+      //       continue
+      //     }
+
+      //     if (!dryRun) {
+      //       const tx = await ClaimFacet.automatedClaimBatch(
+      //         seasonToClaim,
+      //         filteredWallets,
+      //         {
+      //           gasLimit: 13_000_000,
+      //         }
+      //       )
+      //       await tx.wait(5)
+      //       console.log(`https://snowtrace.io/tx/${tx.hash}`)
+      //       await new Promise((resolve) => setTimeout(resolve, 1000))
+      //     } else {
+      //       console.log('Dry run, skipping claim')
+      //     }
+      //     console.log(`✅ Claimed for ${chunk.length} depositors`)
+      //   }
+
+      //   DiamondManagerFacet.setSeasonClaimed()
+      // } catch (error) {
+      //   console.error('❌ AutomatedClaim failed:', error)
+      //   throw error
+      // }
 
       console.log('✅ Done')
     }

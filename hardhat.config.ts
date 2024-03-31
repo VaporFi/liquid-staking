@@ -26,7 +26,6 @@ const config: HardhatUserConfig = {
       chainId: 43114,
       url: AVALANCHE_RPC_URL,
       gasPrice: +parseUnits('28', 'gwei').toString(),
-      gasMultiplier: 1.5,
     },
     fuji: {
       accounts: [DEPLOYER_PRIVATE_KEY],
