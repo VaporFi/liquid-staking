@@ -52,13 +52,6 @@ contract DiamondManagerFacet {
         _;
     }
 
-    modifier onlyGelatoExecutor() {
-        if (msg.sender != s.gelatoExecutor) {
-            revert DiamondManagerFacet__NotGelatoExecutor();
-        }
-        _;
-    }
-
     modifier onlyAuthorized() {
         if (!s.authorized[msg.sender]) {
             revert DiamondManagerFacet__NotAuthorized();
@@ -159,7 +152,7 @@ contract DiamondManagerFacet {
     function startNewSeasonWithEndTimestamp(
         uint256 _rewardTokenToDistribute,
         uint256 _endTimestamp
-    ) external onlyOwner {
+    ) external onlyAuthorized {
         uint256 _currentSeason = s.currentSeasonId;
         if (_currentSeason != 0 && s.seasons[_currentSeason].endTimestamp >= block.timestamp) {
             revert DiamondManagerFacet__Season_Not_Finished();
@@ -196,7 +189,7 @@ contract DiamondManagerFacet {
         s.seasons[currentSeasonId].totalPoints -= difference;
     }
 
-    function claimTokensForSeason() external onlyOwner {
+    function claimTokensForSeason() external onlyAuthorized {
         IEmissionsManager(s.emissionsManager).mintLiquidMining();
         emit VapeClaimedForSeason(s.currentSeasonId);
     }

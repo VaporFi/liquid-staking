@@ -9,6 +9,8 @@ import '@nomicfoundation/hardhat-toolbox'
 import './tasks/verify'
 import './tasks/automatedClaim'
 import './tasks/season'
+import './tasks/admin'
+
 import { formatUnits, parseUnits } from 'ethers'
 
 const AVALANCHE_RPC_URL = getEnvValSafe('AVALANCHE_RPC_URL')

@@ -22,3 +22,22 @@ task('season:set-season-end', 'Force set the end of the current season')
 
     console.log('✅ Set season end timestamp')
   })
+
+task('season:get-season-end', 'Get the end of the current season').setAction(
+  async ({ end }, { ethers, network }) => {
+    const diamondAddress =
+      LiquidMiningDiamond[network.name as keyof typeof LiquidMiningDiamond]
+        .address
+    const DiamondManagerFacet = await ethers.getContractAt(
+      'DiamondManagerFacet',
+      diamondAddress
+    )
+
+    const currentSeasonId = await DiamondManagerFacet.getCurrentSeasonId()
+    const seasonEndTimestamp = await DiamondManagerFacet.getSeasonEndTimestamp(
+      currentSeasonId.toString()
+    )
+
+    console.log('Season end timestamp:', seasonEndTimestamp.toString())
+  }
+)

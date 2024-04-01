@@ -12,7 +12,8 @@
     "sort": "sort-package-json",
     "test": "make test",
     "test:hardhat": "hardhat test",
-    "upgradeDiamond:avalanche": "hardhat run --network avalanche scripts/upgradeDiamond.ts"
+    "upgradeDiamond:avalanche": "hardhat run --network avalanche scripts/upgradeDiamond.ts",
+    "verify:avalanche": "hardhat verify:all --network avalanche"
   },
   "lint-staged": {
     "*.sol": [

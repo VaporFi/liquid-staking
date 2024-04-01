@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 
 // Load facets from the src/facets folder, return an array of facet names
-function getFacets(omit: string[] = ['DiamondCutFacet']) {
+function getFacets(omit: string[] = ['DiamondCutFacet', 'DiamondLoupeFacet']) {
   const facets = fs
     .readdirSync('./src/facets')
     .map((file) => path.parse(file).name)
