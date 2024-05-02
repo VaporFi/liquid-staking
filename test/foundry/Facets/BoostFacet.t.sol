@@ -10,6 +10,7 @@ import { DiamondManagerFacet } from "src/facets/DiamondManagerFacet.sol";
 import { ERC20Mock } from "test/foundry/mocks/ERC20Mock.sol";
 import { StratosphereMock } from "test/foundry/mocks/StratosphereMock.sol";
 import { LPercentages } from "src/libraries/LPercentages.sol";
+import { RewardsControllerMock } from "test/foundry/mocks/RewardsControllerMock.sol";
 
 contract BoostFacetTest is DiamondTest {
     // StdCheats cheats = StdCheats(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
@@ -18,15 +19,21 @@ contract BoostFacetTest is DiamondTest {
     ClaimFacet internal claimFacet;
     BoostFacet internal boostFacet;
     DiamondManagerFacet internal diamondManagerFacet;
+    RewardsControllerMock internal rewardsControllerMock;
 
     // setup addresses
     address feeReceiver1 = makeAddr("feeReceiver1");
     address feeReceiver2 = makeAddr("feeReceiver2");
     address diamondOwner = makeAddr("diamondOwner");
     address user = makeAddr("user");
+
+    // Stratosphere Mocks
     address stratosphereMemberBasic = makeAddr("stratosphereMemberBasic");
     address stratosphereMemberSilver = makeAddr("stratosphereMemberSilver");
     address stratosphereMemberGold = makeAddr("stratosphereMemberGold");
+    address stratosphereMemberPlatinum = makeAddr("stratosphereMemberPlatinum");
+    address stratosphereMemberDiamond = makeAddr("stratosphereMemberDiamond");
+    address stratosphereMemberObsidian = makeAddr("stratosphereMemberObsidian");
     // setup test details
     uint256 rewardTokenToDistribute = 10000 * 1e18;
     uint256 testDepositAmount = 5000 * 1e18;
@@ -66,10 +73,12 @@ contract BoostFacetTest is DiamondTest {
         depositFacet = DepositFacet(address(diamond));
         claimFacet = ClaimFacet(address(diamond));
         boostFacet = BoostFacet(address(diamond));
+        rewardsControllerMock = new RewardsControllerMock();
 
         // Set up season details for deposit
         rewardToken.mint(address(diamond), rewardTokenToDistribute);
         diamondManagerFacet.startNewSeason(rewardTokenToDistribute);
+        diamondManagerFacet.setRewardControllerAddress(address(rewardsControllerMock));
 
         vm.stopPrank();
     }
@@ -126,58 +135,58 @@ contract BoostFacetTest is DiamondTest {
         vm.stopPrank();
     }
 
-    // FIXME: test case is failing because of Stratosphere tierOf being hardcoded to 0
-    // function test_BoostWithStratSilverLvl1() public {
-    //     vm.startPrank(stratosphereMemberSilver);
-    //     uint256 _currentSeasonId = diamondManagerFacet.getCurrentSeasonId();
-    //     _mintAndDeposit(stratosphereMemberSilver, testDepositAmount);
-    //     _fundUserWithBoostFeeToken(stratosphereMemberSilver, boostFeeLvl1);
-    //     assertEq(feeToken.balanceOf(stratosphereMemberSilver), boostFeeLvl1);
+    function test_BoostWithStratSilverLvl1() public {
+        vm.startPrank(stratosphereMemberSilver);
+        uint256 _currentSeasonId = diamondManagerFacet.getCurrentSeasonId();
+        _mintAndDeposit(stratosphereMemberSilver, testDepositAmount);
+        _fundUserWithBoostFeeToken(stratosphereMemberSilver, boostFeeLvl1);
+        assertEq(feeToken.balanceOf(stratosphereMemberSilver), boostFeeLvl1);
 
-    //     (uint256 depositPointsTillNow, uint256 boostPointsTillNow) = diamondManagerFacet.getUserPoints(
-    //         stratosphereMemberSilver,
-    //         _currentSeasonId
-    //     );
-    //     uint256 totalPointsTillNow = depositPointsTillNow + boostPointsTillNow;
+        (uint256 depositPointsTillNow, uint256 boostPointsTillNow) = diamondManagerFacet.getUserPoints(
+            stratosphereMemberSilver,
+            _currentSeasonId
+        );
+        uint256 totalPointsTillNow = depositPointsTillNow + boostPointsTillNow;
 
-    //     vm.warp(block.timestamp + 3 days);
-    //     uint256 expectedTotalPoints = totalPointsTillNow + _calculatePoints(totalPointsTillNow, boostLvl1Tier2);
+        vm.warp(block.timestamp + 3 days);
+        uint256 expectedTotalPoints = totalPointsTillNow +
+            _calculatePoints(totalPointsTillNow, boostLvl1Tier2, testDepositAmount, boostLvl1Tier2);
 
-    //     boostFacet.claimBoost(1);
+        boostFacet.claimBoost(1);
 
-    //     uint256 lastBoostClaimedAmount = diamondManagerFacet.getUserLastBoostClaimedAmount(
-    //         stratosphereMemberSilver,
-    //         _currentSeasonId
-    //     );
-    //     assertEq(totalPointsTillNow + lastBoostClaimedAmount, expectedTotalPoints);
-    //     assertEq(feeToken.balanceOf(stratosphereMemberSilver), 0);
-    //     assertEq(feeToken.balanceOf(address(boostFacet)), boostFeeLvl1);
-    //     vm.stopPrank();
-    // }
+        uint256 lastBoostClaimedAmount = diamondManagerFacet.getUserLastBoostClaimedAmount(
+            stratosphereMemberSilver,
+            _currentSeasonId
+        );
+        assertEq(totalPointsTillNow + lastBoostClaimedAmount, expectedTotalPoints);
+        assertEq(feeToken.balanceOf(stratosphereMemberSilver), 0);
+        assertEq(feeToken.balanceOf(address(boostFacet)), boostFeeLvl1);
+        vm.stopPrank();
+    }
 
-    // FIXME: test case is failing because of Stratosphere tierOf being hardcoded to 0
-    // function test_BoostWithStratGoldLvl1() public {
-    //     vm.startPrank(stratosphereMemberGold);
-    //     _mintAndDeposit(stratosphereMemberGold, testDepositAmount);
-    //     _fundUserWithBoostFeeToken(stratosphereMemberGold, boostFeeLvl1);
-    //     assertEq(feeToken.balanceOf(stratosphereMemberGold), boostFeeLvl1);
+    function test_BoostWithStratGoldLvl1() public {
+        vm.startPrank(stratosphereMemberGold);
+        _mintAndDeposit(stratosphereMemberGold, testDepositAmount);
+        _fundUserWithBoostFeeToken(stratosphereMemberGold, boostFeeLvl1);
+        assertEq(feeToken.balanceOf(stratosphereMemberGold), boostFeeLvl1);
 
-    //     (uint256 depositPointsTillNow, uint256 boostPointsTillNow) = diamondManagerFacet.getUserPoints(
-    //         stratosphereMemberGold,
-    //         1
-    //     );
-    //     uint256 totalPointsTillNow = depositPointsTillNow + boostPointsTillNow;
+        (uint256 depositPointsTillNow, uint256 boostPointsTillNow) = diamondManagerFacet.getUserPoints(
+            stratosphereMemberGold,
+            1
+        );
+        uint256 totalPointsTillNow = depositPointsTillNow + boostPointsTillNow;
 
-    //     vm.warp(block.timestamp + 3 days);
-    //     uint256 expectedTotalPoints = totalPointsTillNow + _calculatePoints(totalPointsTillNow, boostLvl1Tier3);
+        vm.warp(block.timestamp + 3 days);
+        uint256 expectedTotalPoints = totalPointsTillNow +
+            _calculatePoints(totalPointsTillNow, boostLvl1Tier3, testDepositAmount, boostLvl1Tier3);
 
-    //     boostFacet.claimBoost(1);
-    //     uint256 lastBoostClaimedAmount = diamondManagerFacet.getUserLastBoostClaimedAmount(stratosphereMemberGold, 1);
-    //     assertEq(totalPointsTillNow + lastBoostClaimedAmount, expectedTotalPoints);
-    //     assertEq(feeToken.balanceOf(stratosphereMemberGold), 0);
-    //     assertEq(feeToken.balanceOf(address(boostFacet)), boostFeeLvl1);
-    //     vm.stopPrank();
-    // }
+        boostFacet.claimBoost(1);
+        uint256 lastBoostClaimedAmount = diamondManagerFacet.getUserLastBoostClaimedAmount(stratosphereMemberGold, 1);
+        assertEq(totalPointsTillNow + lastBoostClaimedAmount, expectedTotalPoints);
+        assertEq(feeToken.balanceOf(stratosphereMemberGold), 0);
+        assertEq(feeToken.balanceOf(address(boostFacet)), boostFeeLvl1);
+        vm.stopPrank();
+    }
 
     function test_BoostWithStratBasicLvl2() public {
         vm.startPrank(stratosphereMemberBasic);
