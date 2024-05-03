@@ -46,24 +46,24 @@ contract BoostFacetTest is DiamondTest {
     uint256 boostFeeLvl2 = 3 * 1e6;
     uint256 boostFeeLvl3 = 4 * 1e6;
     // boost data setup
-    uint256 boostLvl1Tier1 = 22;
-    uint256 boostLvl1Tier2 = 28;
-    uint256 boostLvl1Tier3 = 37;
-    uint256 boostLvl1Tier4 = 51;
-    uint256 boostLvl1Tier5 = 74;
-    uint256 boostLvl1Tier6 = 115;
-    uint256 boostLvl2Tier1 = 24;
-    uint256 boostLvl2Tier2 = 30;
-    uint256 boostLvl2Tier3 = 40;
-    uint256 boostLvl2Tier4 = 55;
-    uint256 boostLvl2Tier5 = 81;
-    uint256 boostLvl2Tier6 = 125;
-    uint256 boostLvl3Tier1 = 26;
-    uint256 boostLvl3Tier2 = 33;
-    uint256 boostLvl3Tier3 = 44;
-    uint256 boostLvl3Tier4 = 60;
-    uint256 boostLvl3Tier5 = 87;
-    uint256 boostLvl3Tier6 = 135;
+    uint256 boostLvl1Tier0 = 22;
+    uint256 boostLvl1Tier1 = 28;
+    uint256 boostLvl1Tier2 = 37;
+    uint256 boostLvl1Tier3 = 51;
+    uint256 boostLvl1Tier4 = 74;
+    uint256 boostLvl1Tier5 = 115;
+    uint256 boostLvl2Tier0 = 24;
+    uint256 boostLvl2Tier1 = 30;
+    uint256 boostLvl2Tier2 = 40;
+    uint256 boostLvl2Tier3 = 55;
+    uint256 boostLvl2Tier4 = 81;
+    uint256 boostLvl2Tier5 = 125;
+    uint256 boostLvl3Tier0 = 26;
+    uint256 boostLvl3Tier1 = 33;
+    uint256 boostLvl3Tier2 = 44;
+    uint256 boostLvl3Tier3 = 60;
+    uint256 boostLvl3Tier4 = 87;
+    uint256 boostLvl3Tier5 = 135;
 
     function setUp() public {
         vm.startPrank(diamondOwner);
@@ -118,7 +118,7 @@ contract BoostFacetTest is DiamondTest {
             depositPointsTillNow,
             boostPointsTillNow,
             depositAmount,
-            boostLvl1Tier1
+            boostLvl1Tier0
         );
         uint256 expectedTotalPoints = totalPointsTillNow + _caculatedPoints;
         console.log("[BoostFacetTest] expectedTotalPoints", expectedTotalPoints);
@@ -150,7 +150,7 @@ contract BoostFacetTest is DiamondTest {
 
         vm.warp(block.timestamp + 3 days);
         uint256 expectedTotalPoints = totalPointsTillNow +
-            _calculatePoints(totalPointsTillNow, boostLvl1Tier2, testDepositAmount, boostLvl1Tier2);
+            _calculatePoints(totalPointsTillNow, boostLvl1Tier1, testDepositAmount, boostLvl1Tier1);
 
         boostFacet.claimBoost(1);
 
@@ -178,7 +178,7 @@ contract BoostFacetTest is DiamondTest {
 
         vm.warp(block.timestamp + 3 days);
         uint256 expectedTotalPoints = totalPointsTillNow +
-            _calculatePoints(totalPointsTillNow, boostLvl1Tier3, testDepositAmount, boostLvl1Tier3);
+            _calculatePoints(totalPointsTillNow, boostLvl1Tier2, testDepositAmount, boostLvl1Tier2);
 
         boostFacet.claimBoost(1);
         uint256 lastBoostClaimedAmount = diamondManagerFacet.getUserLastBoostClaimedAmount(stratosphereMemberGold, 1);
@@ -205,7 +205,7 @@ contract BoostFacetTest is DiamondTest {
         vm.warp(block.timestamp + 3 days);
 
         uint256 expectedTotalPoints = totalPointsTillNow +
-            _calculatePoints(depositPointsTillNow, boostPointsTillNow, depositAmount, boostLvl2Tier1);
+            _calculatePoints(depositPointsTillNow, boostPointsTillNow, depositAmount, boostLvl2Tier0);
         boostFacet.claimBoost(2);
         uint256 lastBoostClaimedAmount = diamondManagerFacet.getUserLastBoostClaimedAmount(
             stratosphereMemberBasic,
