@@ -36,6 +36,7 @@ contract DiamondInit {
         address replenishmentPool;
         address labsMultisig;
         address burnWallet;
+        address rewardsController;
     }
 
     // You can add parameters to this function in order to pass in
@@ -148,5 +149,9 @@ contract DiamondInit {
         s.miningPassFeeReceiversShares.push(6500); // 65%
         s.miningPassFeeReceiversShares.push(3000); // 30%
         s.miningPassFeeReceiversShares.push(500); // 5%
+
+        // Rewards Controller
+
+        s.rewardsControllerAddress = _args.rewardsController;
     }
 }
