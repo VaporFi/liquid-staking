@@ -31,7 +31,7 @@ contract UnlockFacetTest is DiamondTest {
     address stratosphereMemberDiamond = makeAddr("stratosphereMemberDiamond");
     address stratosphereMemberObsidian = makeAddr("stratosphereMemberObsidian");
 
-    uint256 public constant COOLDOWN_PERIOD = 72 * 3600; // 72 Hours
+    uint256 public constant COOLDOWN_PERIOD = 72 hours;
 
     function setUp() public {
         vm.startPrank(makeAddr("diamondOwner"));

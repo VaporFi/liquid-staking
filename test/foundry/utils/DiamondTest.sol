@@ -209,7 +209,7 @@ contract DiamondTest is Test {
         functionSelectors[27] = diamondManager.setUnlockFeeReceivers.selector;
         functionSelectors[28] = diamondManager.getUserLastBoostClaimedAmount.selector;
         functionSelectors[29] = diamondManager.setRewardControllerAddress.selector;
-        functionSelectors[30] = diamondManager.getUnlockDiscountForStratosphereMember.selector;
+        functionSelectors[30] = diamondManager.getUnlockDiscount.selector;
 
         cut.push(
             IDiamondCut.FacetCut({

@@ -373,7 +373,7 @@ contract DiamondManagerFacet {
         return s.isSeasonClaimed[seasonId];
     }
 
-    function getUnlockDiscountForStratosphereMember(uint256 tier) external view returns (uint256) {
+    function getUnlockDiscount(uint256 tier) external view returns (uint256) {
         return s.unlockTimestampDiscountForStratosphereMembers[tier];
     }
 }

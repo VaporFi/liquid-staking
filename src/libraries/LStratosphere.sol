@@ -27,7 +27,7 @@ library LStratosphere {
         if (_tokenId > 0) {
             isStratosphereMember = true;
             IRewardsController _rewardsController = IRewardsController(s.rewardsControllerAddress);
-            tier = _rewardsController.tierOf(_tokenId);
+            tier = _rewardsController.tierOf(_tokenId); // Revert if rewardsControllerAddress is not set
         }
     }
 }
