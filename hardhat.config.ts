@@ -53,6 +53,32 @@ const config: HardhatUserConfig = {
       },
     },
   },
+  etherscan: {
+    apiKey: {
+      snowtrace: 'snowtrace',
+      snowtraceFuji: 'snowtraceFuji',
+    },
+    customChains: [
+      {
+        network: 'snowtrace',
+        chainId: 43114,
+        urls: {
+          apiURL:
+            'https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan',
+          browserURL: 'https://snowtrace.dev/',
+        },
+      },
+      {
+        network: 'snowtraceFuji',
+        chainId: 43113,
+        urls: {
+          apiURL:
+            'https://api.routescan.io/v2/network/testnet/evm/43113/etherscan',
+          browserURL: 'https://testnet.snowtrace.io/',
+        },
+      },
+    ],
+  },
 }
 
 export default config

@@ -37,6 +37,7 @@ contract DiamondManagerFacet {
     event UnlockFeeReceiversSet(address[] receivers, uint256[] proportion);
     event SeasonStarted(uint256 indexed seasonId, uint256 rewardTokenToDistribute);
     event SeasonEnded(uint256 indexed seasonId, uint256 rewardTokenDistributed);
+    event MiningPassFeeReceiversSet(address[] receivers, uint256[] proportion);
 
     modifier onlyOwner() {
         if (msg.sender != LDiamond.contractOwner()) {
@@ -109,6 +110,22 @@ contract DiamondManagerFacet {
         s.unlockFeeReceivers = receivers;
         s.unlockFeeReceiversShares = proportion;
         emit UnlockFeeReceiversSet(receivers, proportion);
+    }
+
+    function setMiningPassFeeReceivers(address[] memory receivers, uint256[] memory proportion) external onlyOwner {
+        if (receivers.length != proportion.length) {
+            revert DiamondManagerFacet__Invalid_Input();
+        }
+        uint256 totalShares = 0;
+        for (uint256 i; i < proportion.length; i++) {
+            totalShares += proportion[i];
+        }
+        if (totalShares != TOTAL_SHARES) {
+            revert DiamondManagerFacet__Invalid_Input();
+        }
+        s.miningPassFeeReceivers = receivers;
+        s.miningPassFeeReceiversShares = proportion;
+        emit MiningPassFeeReceiversSet(receivers, proportion);
     }
 
     function setRewardToken(address token) external validAddress(token) onlyOwner {

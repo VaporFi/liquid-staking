@@ -2,7 +2,6 @@ import { network } from 'hardhat'
 import LiquidMiningDiamond from '../deployments/LiquidMiningDiamond.json'
 import { deployContract } from '../utils/deployContract'
 import { addOrReplaceFacets } from '../utils/diamond'
-import { defaultArgs } from './deploy/deployDiamond'
 import getFacets from '../utils/getFacets'
 
 async function main() {
