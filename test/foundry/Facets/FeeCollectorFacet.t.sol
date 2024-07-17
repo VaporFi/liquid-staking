@@ -12,6 +12,7 @@ import { DiamondManagerFacet } from "src/facets/DiamondManagerFacet.sol";
 import { ERC20Mock } from "test/foundry/mocks/ERC20Mock.sol";
 import { StratosphereMock } from "test/foundry/mocks/StratosphereMock.sol";
 import "src/libraries/LPercentages.sol";
+import { RewardsControllerMock } from "test/foundry/mocks/RewardsControllerMock.sol";
 
 contract FeeCollectorFacetTest is DiamondTest {
     // StdCheats cheats = StdCheats(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
@@ -22,6 +23,7 @@ contract FeeCollectorFacetTest is DiamondTest {
     FeeCollectorFacet internal feeCollectorFacet;
     ClaimFacet internal claimFacet;
     BoostFacet internal boostFacet;
+    RewardsControllerMock internal rewardsControllerMock;
     address depositFeeReceiver1 = makeAddr("depositFeeReceiver1");
     address depositFeeReceiver2 = makeAddr("depositFeeReceiver2");
     address stratosphereMemberBasic = makeAddr("stratosphereMemberBasic");
@@ -37,6 +39,7 @@ contract FeeCollectorFacetTest is DiamondTest {
         feeCollectorFacet = FeeCollectorFacet(address(diamond));
         claimFacet = ClaimFacet(address(diamond));
         boostFacet = BoostFacet(address(diamond));
+        rewardsControllerMock = new RewardsControllerMock();
 
         // diamondManagerFacet.setCurrentSeasonId(1);
         // diamondManagerFacet.setSeasonEndTimestamp(1, block.timestamp + 30 days);
@@ -51,6 +54,7 @@ contract FeeCollectorFacetTest is DiamondTest {
         depositFeeProportions[1] = 2500;
         diamondManagerFacet.setUnlockFeeReceivers(depositFeeReceivers, depositFeeProportions);
         diamondManagerFacet.setBoostFeeReceivers(depositFeeReceivers, depositFeeProportions);
+        diamondManagerFacet.setRewardControllerAddress(address(rewardsControllerMock));
 
         vm.stopPrank();
     }

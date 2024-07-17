@@ -36,6 +36,7 @@ contract DiamondInit {
         address replenishmentPool;
         address labsMultisig;
         address burnWallet;
+        address rewardsController;
     }
 
     // You can add parameters to this function in order to pass in
@@ -67,11 +68,11 @@ contract DiamondInit {
         s.unlockFee = _args.unlockFee;
 
         s.unlockTimestampDiscountForStratosphereMembers[0] = 500; // 5%
-        s.unlockTimestampDiscountForStratosphereMembers[1] = 550; // 5.5%
-        s.unlockTimestampDiscountForStratosphereMembers[2] = 650; // 6.5%
-        s.unlockTimestampDiscountForStratosphereMembers[3] = 800; // 8%
-        s.unlockTimestampDiscountForStratosphereMembers[4] = 1000; // 10%
-        s.unlockTimestampDiscountForStratosphereMembers[5] = 1500; // 15%
+        s.unlockTimestampDiscountForStratosphereMembers[1] = 650; // 6.5%
+        s.unlockTimestampDiscountForStratosphereMembers[2] = 900; // 9%
+        s.unlockTimestampDiscountForStratosphereMembers[3] = 1300; // 13%
+        s.unlockTimestampDiscountForStratosphereMembers[4] = 2000; // 20%
+        s.unlockTimestampDiscountForStratosphereMembers[5] = 3250; // 32.5%
         s.unlockFeeReceivers.push(_args.replenishmentPool);
         s.unlockFeeReceivers.push(_args.labsMultisig);
         s.unlockFeeReceivers.push(_args.burnWallet);
@@ -148,5 +149,9 @@ contract DiamondInit {
         s.miningPassFeeReceiversShares.push(6500); // 65%
         s.miningPassFeeReceiversShares.push(3000); // 30%
         s.miningPassFeeReceiversShares.push(500); // 5%
+
+        // Rewards Controller
+
+        s.rewardsControllerAddress = _args.rewardsController;
     }
 }

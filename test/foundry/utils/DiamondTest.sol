@@ -178,7 +178,7 @@ contract DiamondTest is Test {
     function setDiamondManagerFacet() private {
         DiamondManagerFacet diamondManager = new DiamondManagerFacet();
         bytes4[] memory functionSelectors;
-        functionSelectors = new bytes4[](29);
+        functionSelectors = new bytes4[](31);
         functionSelectors[0] = diamondManager.setDepositToken.selector;
         functionSelectors[1] = diamondManager.setCurrentSeasonId.selector;
         functionSelectors[2] = diamondManager.setStratosphereAddress.selector;
@@ -208,6 +208,8 @@ contract DiamondTest is Test {
         functionSelectors[26] = diamondManager.setBoostFeeReceivers.selector;
         functionSelectors[27] = diamondManager.setUnlockFeeReceivers.selector;
         functionSelectors[28] = diamondManager.getUserLastBoostClaimedAmount.selector;
+        functionSelectors[29] = diamondManager.setRewardControllerAddress.selector;
+        functionSelectors[30] = diamondManager.getUnlockDiscount.selector;
 
         cut.push(
             IDiamondCut.FacetCut({

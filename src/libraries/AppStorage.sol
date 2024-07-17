@@ -91,4 +91,8 @@ struct AppStorage {
     //////////////////
     address gelatoExecutor;
     mapping(uint256 => bool) isSeasonClaimed;
+    //////////////////////////
+    /// REWARDS CONTROLLER ///
+    //////////////////////////
+    address rewardsControllerAddress;
 }

@@ -3,6 +3,7 @@ pragma solidity 0.8.18;
 
 import { AppStorage } from "./AppStorage.sol";
 import { IStratosphere } from "../interfaces/IStratosphere.sol";
+import { IRewardsController } from "../interfaces/IRewardsController.sol";
 
 /// @title LStratosphere
 /// @notice Library in charge of Stratosphere related logic
@@ -22,9 +23,11 @@ library LStratosphere {
     ) internal view returns (bool isStratosphereMember, uint8 tier) {
         IStratosphere _stratosphere = IStratosphere(s.stratosphereAddress);
         uint256 _tokenId = _stratosphere.tokenIdOf(_address);
+
         if (_tokenId > 0) {
             isStratosphereMember = true;
-            tier = 0;
+            IRewardsController _rewardsController = IRewardsController(s.rewardsControllerAddress);
+            tier = _rewardsController.tierOf(_tokenId); // Revert if rewardsControllerAddress is not set
         }
     }
 }

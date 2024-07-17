@@ -254,6 +254,14 @@ contract DiamondManagerFacet {
         s.isSeasonClaimed[s.currentSeasonId] = true;
     }
 
+    function setRewardControllerAddress(address _rewardsControllerAddress) external onlyOwner {
+        if (_rewardsControllerAddress == address(0)) {
+            revert DiamondManagerFacet__Invalid_Address();
+        }
+        s.rewardsControllerAddress = _rewardsControllerAddress;
+        emit RewardsControllerAddressSet(_rewardsControllerAddress);
+    }
+
     // Getters
 
     function getRewardTokenToDistribute(uint256 _seasonId) external view returns (uint256) {
@@ -380,5 +388,9 @@ contract DiamondManagerFacet {
 
     function getSeasonIsClaimed(uint256 seasonId) external view returns (bool) {
         return s.isSeasonClaimed[seasonId];
+    }
+
+    function getUnlockDiscount(uint256 tier) external view returns (uint256) {
+        return s.unlockTimestampDiscountForStratosphereMembers[tier];
     }
 }
